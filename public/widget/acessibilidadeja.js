@@ -7,14 +7,13 @@
  */
 (function () {
   'use strict';
-  // GoF criacional: Singleton (Instância Única).
   var WidgetSingleton = {
-    estaPronto: function () { return !!window.__AcessibilidadeJa__; },
-    marcarPronto: function () { window.__AcessibilidadeJa__ = true; },
+    isReady: function () { return !!window.__AcessibilidadeJa__; },
+    markReady: function () { window.__AcessibilidadeJa__ = true; },
   };
 
-  if (WidgetSingleton.estaPronto()) return;
-  WidgetSingleton.marcarPronto();
+  if (WidgetSingleton.isReady()) return;
+  WidgetSingleton.markReady();
 
   var CFG = Object.assign({ position: 'bottom-right', lang: 'pt-BR' }, window.AcessibilidadeJaConfig || {});
   var STORAGE_KEY = 'acessibilidadeja:state:v1';
@@ -50,7 +49,7 @@
   .ajw-close:hover { background:#eef5f7; }
   .ajw-body { padding:14px; overflow-y:auto; flex:1; }
   .ajw-item { display:flex; align-items:center; gap:12px; width:100%; padding:12px 14px; margin-bottom:8px;
-              border:1px solid rgb(66, 191, 223); background:#fff; border-radius:14px; cursor:pointer; text-align:left;
+              border:1px solidrgb(66, 191, 223); background:#fff; border-radius:14px; cursor:pointer; text-align:left;
               color:#1a2a30; font-size:14px; font-weight:500; transition:all .15s; }
   .ajw-item:hover { border-color:#1B5E6E; background:#f3fafc; }
   .ajw-item.active { background:#1B5E6E; color:#fff; border-color:#1B5E6E; }
@@ -58,8 +57,6 @@
   .ajw-section-title { font-size:11px; font-weight:700; color:#5a7680; text-transform:uppercase; letter-spacing:.08em; margin:14px 6px 8px; }
   .ajw-row { display:flex; align-items:center; justify-content:space-between; padding:10px 14px; border:1px solid #e6eef0; border-radius:14px; margin-bottom:8px; }
   .ajw-row label { font-size:14px; font-weight:500; }
-  .ajw-translate-label { display:flex; gap:8px; align-items:center; }
-  .ajw-translate-label svg { width:22px; height:22px; flex-shrink:0; }
   .ajw-stepper { display:flex; align-items:center; gap:6px; }
   .ajw-stepper button { width:28px; height:28px; border-radius:50%; border:1px solid #1B5E6E; background:#fff; color:#1B5E6E; cursor:pointer; font-size:16px; font-weight:700; }
   .ajw-stepper span { min-width:36px; text-align:center; font-weight:600; font-size:13px; }
@@ -111,10 +108,9 @@
   .ajw-reading-guide::after { top:100%; }
   `;
 
-  // ---------- GoFs criacionais ----------
-  // Factory Method (Método Fábrica): cria SVGs pelo nome do ícone.
+  // ---------- creation patterns ----------
   var IconFactory = {
-    icones: {
+    icons: {
       contrast_light: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>',
       contrast_dark: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>',
       zoom: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3M8 11h6M11 8v6"/></svg>',
@@ -129,57 +125,55 @@
       access: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2.2"/><path d="M5 9l4.5 1.5h5L19 9M12 10.5V14M12 14l-3 7M12 14l3 7"/></svg>',
       close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>',
     },
-    criar: function (nome) {
-      return this.icones[nome] || '';
+    create: function (name) {
+      return this.icons[name] || '';
     },
   };
 
-  // Prototype (Protótipo): clona a base usada nas opções do menu.
-  var OptionsPrototype = {
-    tipo: 'toggle',
-    clonar: function (propriedades) {
-      return Object.assign({}, this, propriedades || {});
+  var OptionPrototype = {
+    type: 'toggle',
+    clone: function (props) {
+      return Object.assign({}, this, props || {});
     },
   };
 
-  var opcoesAlternar = [
-    OptionsPrototype.clonar({ secao: 'Visualização', chave: 'contrast-light', icone: 'contrast_light', rotulo: 'Contraste claro' }),
-    OptionsPrototype.clonar({ secao: 'Visualização', chave: 'contrast-dark', icone: 'contrast_dark', rotulo: 'Contraste escuro' }),
-    OptionsPrototype.clonar({ secao: 'Visualização', chave: 'grayscale', icone: 'grayscale', rotulo: 'Escala de cinza' }),
-    OptionsPrototype.clonar({ secao: 'Visualização', chave: 'highlight-links', icone: 'links', rotulo: 'Destacar links' }),
-    OptionsPrototype.clonar({ secao: 'Leitura', chave: 'reading-mode', icone: 'reading', rotulo: 'Modo leitura' }),
-    OptionsPrototype.clonar({ secao: 'Leitura', chave: 'reading-guide', icone: 'guide', rotulo: 'Guia de leitura' }),
-    OptionsPrototype.clonar({ secao: 'Leitura', chave: 'dyslexia', icone: 'dyslexia', rotulo: 'Fonte para dislexia' }),
-    OptionsPrototype.clonar({ secao: 'Navegação', chave: 'big-cursor', icone: 'cursor', rotulo: 'Cursor grande' }),
-    OptionsPrototype.clonar({ secao: 'Navegação', chave: 'pause-anim', icone: 'pause', rotulo: 'Pausar animações' }),
+  var toggleOptions = [
+    OptionPrototype.clone({ section: 'VisualizaÃ§Ã£o', key: 'contrast-light', icon: 'contrast_light', label: 'Contraste claro' }),
+    OptionPrototype.clone({ section: 'VisualizaÃ§Ã£o', key: 'contrast-dark', icon: 'contrast_dark', label: 'Contraste escuro' }),
+    OptionPrototype.clone({ section: 'VisualizaÃ§Ã£o', key: 'grayscale', icon: 'grayscale', label: 'Escala de cinza' }),
+    OptionPrototype.clone({ section: 'VisualizaÃ§Ã£o', key: 'highlight-links', icon: 'links', label: 'Destacar links' }),
+    OptionPrototype.clone({ section: 'Leitura', key: 'reading-mode', icon: 'reading', label: 'Modo leitura' }),
+    OptionPrototype.clone({ section: 'Leitura', key: 'reading-guide', icon: 'guide', label: 'Guia de leitura' }),
+    OptionPrototype.clone({ section: 'Leitura', key: 'dyslexia', icon: 'dyslexia', label: 'Fonte para dislexia' }),
+    OptionPrototype.clone({ section: 'NavegaÃ§Ã£o', key: 'big-cursor', icon: 'cursor', label: 'Cursor grande' }),
+    OptionPrototype.clone({ section: 'NavegaÃ§Ã£o', key: 'pause-anim', icon: 'pause', label: 'Pausar animaÃ§Ãµes' }),
   ];
 
-  // Abstract Factory (Fábrica Abstrata): cria elementos relacionados ao widget.
   var WidgetElementFactory = {
-    criarEstilo: function (conteudo) {
+    createStyle: function (content) {
       var styleEl = document.createElement('style');
       styleEl.id = 'ajw-styles';
-      styleEl.textContent = conteudo;
+      styleEl.textContent = content;
       return styleEl;
     },
-    criarRaiz: function () {
-      var raiz = document.createElement('div');
-      raiz.className = 'ajw-root';
-      raiz.setAttribute('aria-label', 'Widget de Acessibilidade');
-      return raiz;
+    createRoot: function () {
+      var root = document.createElement('div');
+      root.className = 'ajw-root';
+      root.setAttribute('aria-label', 'Widget de Acessibilidade');
+      return root;
     },
-    criarScriptExterno: function (id, origem) {
+    createExternalScript: function (id, src) {
       var script = document.createElement('script');
       script.id = id;
-      script.src = origem;
+      script.src = src;
       return script;
     },
-    criarGuia: function () {
-      var guia = document.createElement('div');
-      guia.className = 'ajw-reading-guide';
-      return guia;
+    createGuide: function () {
+      var guide = document.createElement('div');
+      guide.className = 'ajw-reading-guide';
+      return guide;
     },
-    criarAlvoDeTraducaoOculto: function () {
+    createHiddenTranslateTarget: function () {
       var div = document.createElement('div');
       div.id = 'google_translate_element';
       div.style.cssText = 'position:fixed;left:-9999px;top:-9999px;';
@@ -187,111 +181,114 @@
     },
   };
 
-  // Builder (Construtor/Montador): monta a interface do widget em etapas.
-  function WidgetBuilder(fabrica, fabricaDeIcones) {
-    this.fabrica = fabrica;
-    this.fabricaDeIcones = fabricaDeIcones;
-    this.raiz = null;
+  function WidgetBuilder(factory, iconFactory) {
+    this.factory = factory;
+    this.iconFactory = iconFactory;
+    this.root = null;
   }
 
-  WidgetBuilder.prototype.montarEstilos = function (conteudo) {
-    document.head.appendChild(this.fabrica.criarEstilo(conteudo));
+  WidgetBuilder.prototype.mountStyles = function (content) {
+    document.head.appendChild(this.factory.createStyle(content));
     return this;
   };
 
-  WidgetBuilder.prototype.montarRaiz = function () {
-    this.raiz = this.fabrica.criarRaiz();
-    document.body.appendChild(this.raiz);
+  WidgetBuilder.prototype.mountRoot = function () {
+    this.root = this.factory.createRoot();
+    document.body.appendChild(this.root);
     return this;
   };
 
-  WidgetBuilder.prototype.construirSecoesAlternar = function () {
+  WidgetBuilder.prototype.buildToggleSections = function () {
     var html = '';
-    var secaoAtual = '';
-    opcoesAlternar.forEach(function (opcao) {
-      if (opcao.secao !== secaoAtual) {
-        secaoAtual = opcao.secao;
-        html += '<div class="ajw-section-title">' + secaoAtual + '</div>';
-        if (secaoAtual === 'Leitura') html += WidgetTemplates.controleZoom();
+    var currentSection = '';
+    toggleOptions.forEach(function (option) {
+      if (option.section !== currentSection) {
+        currentSection = option.section;
+        html += '<div class="ajw-section-title">' + currentSection + '</div>';
+        if (currentSection === 'Leitura') html += WidgetTemplates.zoomControl();
       }
-      html += WidgetTemplates.botaoAlternar(opcao, this.fabricaDeIcones);
+      html += WidgetTemplates.toggleButton(option, this.iconFactory);
     }, this);
     return html;
   };
 
-  WidgetBuilder.prototype.renderizar = function () {
-    this.raiz.innerHTML = WidgetTemplates.estrutura(this.fabricaDeIcones, this.construirSecoesAlternar());
-    return this.raiz;
+  WidgetBuilder.prototype.render = function () {
+    this.root.innerHTML = WidgetTemplates.shell(this.iconFactory, this.buildToggleSections());
+    return this.root;
   };
 
   var WidgetTemplates = {
-    botaoAlternar: function (opcao, fabricaDeIcones) {
-      return '<button class="ajw-item" data-toggle="' + opcao.chave + '">' +
-        fabricaDeIcones.criar(opcao.icone) + '<span>' + opcao.rotulo + '</span></button>';
+    toggleButton: function (option, iconFactory) {
+      return '<button class="ajw-item" data-toggle="' + option.key + '">' +
+        iconFactory.create(option.icon) + '<span>' + option.label + '</span></button>';
     },
-    controleZoom: function () {
+    zoomControl: function () {
       return [
         '<div class="ajw-row">',
         '  <label>Tamanho do texto</label>',
         '  <div class="ajw-stepper">',
-        '    <button id="ajwZoomMinus" aria-label="Diminuir texto">-</button>',
+        '    <button id="ajwZoomMinus" aria-label="Diminuir texto">âˆ’</button>',
         '    <span id="ajwZoomVal">100%</span>',
         '    <button id="ajwZoomPlus" aria-label="Aumentar texto">+</button>',
         '  </div>',
         '</div>',
       ].join('');
     },
-    tradutor: function (fabricaDeIcones) {
+    translator: function (iconFactory) {
       return [
         '<div class="ajw-section-title">Tradutor</div>',
         '<div class="ajw-row" style="flex-direction:column;align-items:stretch;gap:8px">',
-        '  <label class="ajw-translate-label">' + fabricaDeIcones.criar('translate') + ' Traduzir página</label>',
+        '  <label style="display:flex;gap:8px;align-items:center">' + iconFactory.create('translate') + ' Traduzir pÃ¡gina</label>',
         '  <select class="ajw-select" id="ajwLang">',
         '    <option value="">Idioma original</option>',
         '    <option value="en">English</option>',
-        '    <option value="es">Español</option>',
-        '    <option value="fr">Français</option>',
+        '    <option value="es">EspaÃ±ol</option>',
+        '    <option value="fr">FranÃ§ais</option>',
         '    <option value="de">Deutsch</option>',
         '    <option value="it">Italiano</option>',
-        '    <option value="ja">Japanese</option>',
-        '    <option value="zh-CN">Chinese</option>',
+        '    <option value="ja">æ—¥æœ¬èªž</option>',
+        '    <option value="zh-CN">ä¸­æ–‡</option>',
         '  </select>',
         '</div>',
       ].join('');
     },
-    estrutura: function (fabricaDeIcones, secoesAlternar) {
+    shell: function (iconFactory, toggleSections) {
       return [
         '<div class="ajw-reading-exit" id="ajwReadingExit" role="status" aria-live="polite">',
         '  <span>Modo leitura ativo</span>',
         '  <button type="button" class="ajw-reading-exit-btn" id="ajwReadingExitBtn">Sair do modo leitura</button>',
         '</div>',
-        '<button class="ajw-fab" id="ajwFab" aria-label="Abrir menu de acessibilidade" title="Acessibilidade">' + fabricaDeIcones.criar('access') + '</button>',
+        '<button class="ajw-fab" id="ajwFab" aria-label="Abrir menu de acessibilidade" title="Acessibilidade">' + iconFactory.create('access') + '</button>',
         '<div class="ajw-overlay" id="ajwOverlay"></div>',
         '<aside class="ajw-panel" id="ajwPanel" role="dialog" aria-modal="true" aria-label="Recursos de acessibilidade">',
         '  <div class="ajw-header">',
-        '    <h2 class="ajw-title">' + fabricaDeIcones.criar('access') + ' AcessibilidadeJá</h2>',
-        '    <button class="ajw-close" id="ajwClose" aria-label="Fechar">' + fabricaDeIcones.criar('close') + '</button>',
+        '    <h2 class="ajw-title">' + iconFactory.create('access') + ' AcessibilidadeJÃ¡</h2>',
+        '    <button class="ajw-close" id="ajwClose" aria-label="Fechar">' + iconFactory.create('close') + '</button>',
         '  </div>',
         '  <div class="ajw-body">',
-             secoesAlternar,
-             WidgetTemplates.tradutor(fabricaDeIcones),
+             toggleSections,
+             WidgetTemplates.translator(iconFactory),
         '  </div>',
         '  <div class="ajw-footer">',
         '    <button class="ajw-reset" id="ajwReset">Redefinir tudo</button>',
-        '    <div class="ajw-credit">Powered by AcessibilidadeJá</div>',
+        '    <div class="ajw-credit">Powered by AcessibilidadeJÃ¡</div>',
         '  </div>',
         '</aside>',
       ].join('');
     },
-  };
+  }
+
+  function icon(name) {
+    return IconFactory.create(name);
+  }
 
   // ---------- DOM ----------
-  var widgetBuilder = new WidgetBuilder(WidgetElementFactory, IconFactory)
-    .montarEstilos(css)
-    .montarRaiz();
-  var root = widgetBuilder.raiz;
+  var styleEl = WidgetElementFactory.createStyle(css);
+  document.head.appendChild(styleEl);
 
-  /*
+  var widgetBuilder = new WidgetBuilder(WidgetElementFactory, IconFactory).mountRoot();
+  var root = widgetBuilder.root;
+
   root.innerHTML = `
     <div class="ajw-reading-exit" id="ajwReadingExit" role="status" aria-live="polite">
       <span>Modo leitura ativo</span>
@@ -350,20 +347,17 @@
     </aside>
   `;
 
-  */
-  root = widgetBuilder.renderizar();
-
   var fab = root.querySelector('#ajwFab');
   var panel = root.querySelector('#ajwPanel');
   var overlay = root.querySelector('#ajwOverlay');
   var closeBtn = root.querySelector('#ajwClose');
-  fab.addEventListener('click', abrir);
-  closeBtn.addEventListener('click', fechar);
-  overlay.addEventListener('click', fechar);
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') fechar(); });
+  fab.addEventListener('click', open);
+  closeBtn.addEventListener('click', close);
+  overlay.addEventListener('click', close);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
 
-  function abrir() { panel.classList.add('open'); overlay.classList.add('open'); }
-  function fechar() { panel.classList.remove('open'); overlay.classList.remove('open'); }
+  function open() { panel.classList.add('open'); overlay.classList.add('open'); }
+  function close() { panel.classList.remove('open'); overlay.classList.remove('open'); }
 
   // toggles
   root.querySelectorAll('[data-toggle]').forEach(function (btn) {
@@ -407,14 +401,16 @@
 
   // reset
   root.querySelector('#ajwReset').addEventListener('click', function () {
-    redefinir();
+    state = defaultState();
+    save();
+    location.reload();
   });
 
   // reading guide
   var guideEl = null;
   function ensureGuide(on) {
     if (on && !guideEl) {
-      guideEl = WidgetElementFactory.criarGuia();
+      guideEl = WidgetElementFactory.createGuide();
       document.body.appendChild(guideEl);
       document.addEventListener('mousemove', moveGuide);
       moveGuide({ clientY: window.innerHeight / 2 });
@@ -441,12 +437,12 @@
     var host = location.hostname.replace(/^www\./, '');
     document.cookie = 'googtrans=/auto/' + lang + '; path=/; domain=.' + host;
     if (!document.getElementById('google_translate_script')) {
-      var div = WidgetElementFactory.criarAlvoDeTraducaoOculto();
+      var div = WidgetElementFactory.createHiddenTranslateTarget();
       document.body.appendChild(div);
       window.googleTranslateElementInit = function () {
         new window.google.translate.TranslateElement({ pageLanguage: 'auto', autoDisplay: false }, 'google_translate_element');
       };
-      var s = WidgetElementFactory.criarScriptExterno('google_translate_script', 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit');
+      var s = WidgetElementFactory.createExternalScript('google_translate_script', 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit');
       document.head.appendChild(s);
     } else {
       // re-trigger via reload (Google's cookie strategy)
@@ -457,9 +453,9 @@
   // apply state to host
   function apply() {
     var html = document.documentElement;
-    var classes = opcoesAlternar
-      .map(function (opcao) { return opcao.chave; })
-      .filter(function (chave) { return chave !== 'reading-guide'; });
+    var classes = toggleOptions
+      .map(function (option) { return option.key; })
+      .filter(function (key) { return key !== 'reading-guide'; });
     classes.forEach(function (c) {
       html.classList.toggle('ajw-' + c, !!state.toggles[c]);
     });
@@ -492,23 +488,13 @@
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
   }
 
-  function redefinir() {
-    state = defaultState();
-    save();
-    location.reload();
-  }
-
   // initial apply (sem disparar tradutor de novo)
   state._appliedLang = state.lang;
   apply();
 
   // Public API
   window.AcessibilidadeJa = {
-    abrir: abrir,
-    fechar: fechar,
-    redefinir: redefinir,
-    open: abrir,
-    close: fechar,
-    reset: redefinir,
+    open: open, close: close,
+    reset: function () { state = defaultState(); save(); location.reload(); }
   };
 })();
