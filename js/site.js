@@ -81,9 +81,32 @@
     if (document.getElementById("ajw-demo-script")) return;
     var s = document.createElement("script");
     s.id = "ajw-demo-script";
-    s.src = "widget/acessibilidadeja.js";
+    s.src = "/widget/acessibilidadeja.js";
     s.defer = true;
     document.body.appendChild(s);
+  }
+
+  function openAccessibilityWidget(attempt) {
+    attempt = attempt || 0;
+    var api = window.AcessibilidadeJa;
+
+    if (api && typeof api.abrir === "function") {
+      api.abrir();
+      return;
+    }
+
+    if (api && typeof api.open === "function") {
+      api.open();
+      return;
+    }
+
+    loadWidget();
+
+    if (attempt < 20) {
+      setTimeout(function () {
+        openAccessibilityWidget(attempt + 1);
+      }, 100);
+    }
   }
 
   function initCopyButtons() {
@@ -109,9 +132,7 @@
   function initRecursos() {
     document.querySelectorAll("[data-open-widget]").forEach(function (btn) {
       btn.addEventListener("click", function () {
-        if (window.AcessibilidadeJa && window.AcessibilidadeJa.open) {
-          window.AcessibilidadeJa.open();
-        }
+        openAccessibilityWidget();
       });
     });
   }
